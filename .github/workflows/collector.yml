@@ -1,0 +1,39 @@
+name: Datensammler
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: [collector.py]
+  schedule:
+    - cron: "7 */6 * * *"   # Ersatz, falls die Kette einmal reißt
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: collector
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Nächste Schicht anstoßen (wartet, bis diese fertig ist)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run collector.yml --ref main || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install websockets==13.1
+      - name: Sammeln (5 Stunden 40 Minuten)
+        run: |
+          git config user.name "pump-labor-bot"
+          git config user.email "pump-labor-bot@users.noreply.github.com"
+          python collector.py 340

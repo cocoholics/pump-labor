@@ -1,0 +1,33 @@
+name: Auswertung
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "30 23 * * *"   # 7:30 Uhr Bali, vor dem Tagesbericht
+
+permissions:
+  contents: write
+
+concurrency:
+  group: analyse
+  cancel-in-progress: true
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python analyse.py
+      - name: Ergebnis speichern
+        run: |
+          git config user.name "pump-labor-bot"
+          git config user.email "pump-labor-bot@users.noreply.github.com"
+          git add results
+          git diff --cached --quiet || git commit -m "Auswertung"
+          for i in 1 2 3 4 5; do git pull --rebase -q && git push -q && break; sleep 5; done
