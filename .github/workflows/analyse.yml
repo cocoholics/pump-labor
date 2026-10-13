@@ -3,7 +3,7 @@ name: Auswertung
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "30 23 * * *"   # 7:30 Uhr Bali, vor dem Tagesbericht
+    - cron: "50 10,18,2 * * *"   # Ersatz; normal stößt der Sammler die Auswertung alle 8 Stunden an
 
 permissions:
   contents: write

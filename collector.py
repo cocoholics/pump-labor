@@ -148,7 +148,7 @@ def flush(final=False):
         json.dump({"zeit": time.time(), "coins_in_datei": len(items), "davon_mit_trades": with_trades, **stats}, f)
     if os.getenv("GITHUB_ACTIONS"):
         subprocess.run(["git", "add", "results/sammler_status.json"], check=False)
-        if time.gmtime().tm_hour == 23 and os.getenv("GH_TOKEN"):
+        if time.gmtime().tm_hour in (2, 10, 18) and os.getenv("GH_TOKEN"):  # alle 8 Stunden: 10, 18 und 2 Uhr Bali
             subprocess.run(["gh", "workflow", "run", "analyse.yml", "--ref", "main"], check=False)
         for cmd in (["git", "add", path], ["git", "commit", "-qm", f"Daten {path}"]):
             subprocess.run(cmd, check=False)
