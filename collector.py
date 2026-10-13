@@ -16,7 +16,7 @@ import time
 
 import websockets
 
-FEEDS = ["wss://pumpportal.fun/api/data", "wss://pumpdev.io/ws"]
+FEEDS = ["wss://pumpdev.io/ws", "wss://pumpportal.fun/api/data"]  # PumpPortal liefert kaum Trades, PumpDev schon
 TRACK_SECONDS = 600          # jeden Coin 10 Minuten verfolgen
 MAX_TRADES = 3000            # Obergrenze pro Coin, damit einzelne Riesen-Coins den Speicher nicht sprengen
 FLUSH_EVERY = 3600           # stündlich speichern und pushen
@@ -25,7 +25,17 @@ SUB_BATCH = 100              # so viele Coins pro Abo-Nachricht
 tokens = {}                  # mint -> Datensatz
 pending_sub, pending_unsub = [], []
 done = []
-stats = {"neu": 0, "trades": 0, "reconnects": 0}
+stats = {"neu": 0, "trades": 0, "reconnects": 0, "andere": 0}
+K = 30.0 * 1.073e9  # konstantes Produkt der Pump.fun-Kurve (virtuelle SOL x virtuelle Token)
+
+
+def norm_vs(v):
+    """PumpDev liefert Lamports, PumpPortal SOL."""
+    return v / 1e9 if v and v > 1e6 else v
+
+
+def norm_vt(v):
+    return v / 1e6 if v and v > 1e13 else v
 
 
 def now_ms():
@@ -36,15 +46,19 @@ def on_message(msg):
     t = now_ms()
     mint = msg.get("mint")
     if not mint:
+        stats["andere"] += 1
         return
     if msg.get("txType") == "create":
         if mint in tokens:
             return
+        vs, vt = norm_vs(msg.get("vSolInBondingCurve")), norm_vt(msg.get("vTokensInBondingCurve"))
+        if vs and abs(vs - 30.0) < 1e-6 and msg.get("solAmount"):  # PumpDev: Kurve vor dem ersten Kauf des Erfinders
+            vs = 30.0 + float(msg["solAmount"])
+            vt = K / vs
         tokens[mint] = {
-            "mint": mint, "t0": t, "creator": msg.get("traderPublicKey"), "name": msg.get("name"), "symbol": msg.get("symbol"),
+            "v": 2, "mint": mint, "t0": t, "creator": msg.get("traderPublicKey"), "name": msg.get("name"), "symbol": msg.get("symbol"),
             "uri": msg.get("uri"), "initial_buy_sol": msg.get("solAmount"), "initial_buy_tokens": msg.get("initialBuy"),
-            "mcap_sol": msg.get("marketCapSol"), "v_sol": msg.get("vSolInBondingCurve"), "v_tok": msg.get("vTokensInBondingCurve"),
-            "pool": msg.get("pool"), "trades": [],
+            "mcap_sol": msg.get("marketCapSol"), "v_sol": vs, "v_tok": vt, "pool": msg.get("pool"), "trades": [],
         }
         pending_sub.append(mint)
         stats["neu"] += 1
@@ -55,8 +69,8 @@ def on_message(msg):
     side = 1 if msg.get("txType") == "buy" else -1 if msg.get("txType") == "sell" else 0
     if not side:
         return
-    tok["trades"].append([t - tok["t0"], side, msg.get("solAmount"), msg.get("tokenAmount"), msg.get("vSolInBondingCurve"),
-                          msg.get("vTokensInBondingCurve"), msg.get("marketCapSol"), msg.get("traderPublicKey")])
+    tok["trades"].append([t - tok["t0"], side, msg.get("solAmount"), msg.get("tokenAmount"), norm_vs(msg.get("vSolInBondingCurve")),
+                          norm_vt(msg.get("vTokensInBondingCurve")), msg.get("marketCapSol"), msg.get("traderPublicKey")])
     stats["trades"] += 1
 
 
@@ -128,7 +142,14 @@ def flush(final=False):
         for tok in items:
             f.write(json.dumps(tok, separators=(",", ":")) + "\n")
     print(time.strftime("%H:%M:%S"), f"gespeichert: {len(items)} Coins -> {path}", stats, flush=True)
+    with_trades = sum(1 for tok in items if tok["trades"])
+    os.makedirs("results", exist_ok=True)
+    with open("results/sammler_status.json", "w", encoding="utf-8") as f:
+        json.dump({"zeit": time.time(), "coins_in_datei": len(items), "davon_mit_trades": with_trades, **stats}, f)
     if os.getenv("GITHUB_ACTIONS"):
+        subprocess.run(["git", "add", "results/sammler_status.json"], check=False)
+        if time.gmtime().tm_hour == 23 and os.getenv("GH_TOKEN"):
+            subprocess.run(["gh", "workflow", "run", "analyse.yml", "--ref", "main"], check=False)
         for cmd in (["git", "add", path], ["git", "commit", "-qm", f"Daten {path}"]):
             subprocess.run(cmd, check=False)
         for _ in range(5):

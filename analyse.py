@@ -38,7 +38,7 @@ def load():
             with gzip.open(f, "rt", encoding="utf-8") as fh:
                 for line in fh:
                     t = json.loads(line)
-                    if t["mint"] in seen or t["t0"] / 1000 < cutoff:
+                    if t["mint"] in seen or t["t0"] / 1000 < cutoff or t.get("v") != 2:
                         continue
                     seen.add(t["mint"])
                     toks.append(t)
