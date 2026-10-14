@@ -1,0 +1,51 @@
+{
+ "zeit": 1791988821.65864,
+ "ergebnisse": [
+  {
+   "url": "wss://pumpdev.io/ws",
+   "creates": 46,
+   "trades": 83,
+   "traded_mints": 5,
+   "other": {
+    "connected": 1,
+    "connectionStatus": 1,
+    "subscribed": 6,
+    "error": 37,
+    "baseMint,canonicalPool,creator,isCanonicalPool,marketCapQuote,marketCapSol": 1,
+    "baseMint,canonicalPool,creator,isCanonicalPool,marketCapQuote,mint": 1
+   },
+   "samples": [
+    "{\"type\": \"connected\", \"clientId\": 20450, \"message\": \"Connected to PumpDev WebSocket. Send subscription messages to receive data.\"}",
+    "{\"type\": \"connectionStatus\", \"connected\": true, \"timestamp\": 1791988580726}",
+    "{\"type\": \"error\", \"code\": \"SUBSCRIPTION_LIMIT\", \"message\": \"The anonymous tier allows 5 live subscriptions per IP and this IP has reached it. Create a free account and get an API key at https://pumpdev.io/my-account to raise your limits.\", \"dropped\": 2, \"accepted\": 1, \"limit\": 5, \"tier\": \"anonymous\"",
+    "{\"type\": \"error\", \"code\": \"SUBSCRIPTION_LIMIT\", \"message\": \"The anonymous tier allows 5 live subscriptions (tokens + wallets) and you've reached that limit. Create a free account and get an API key at https://pumpdev.io/my-account to raise your limits.\", \"dropped\": 1, \"accepted\": 0, \"limit\": 5, \"tie",
+    "{\"type\": \"error\", \"code\": \"SUBSCRIPTION_LIMIT\", \"message\": \"The anonymous tier allows 5 live subscriptions (tokens + wallets) and you've reached that limit. Create a free account and get an API key at https://pumpdev.io/my-account to raise your limits.\", \"dropped\": 1, \"accepted\": 0, \"limit\": 5, \"tie",
+    "{\"type\": \"error\", \"code\": \"SUBSCRIPTION_LIMIT\", \"message\": \"The anonymous tier allows 5 live subscriptions (tokens + wallets) and you've reached that limit. Create a free account and get an API key at https://pumpdev.io/my-account to raise your limits.\", \"dropped\": 1, \"accepted\": 0, \"limit\": 5, \"tie",
+    "{\"type\": \"error\", \"code\": \"SUBSCRIPTION_LIMIT\", \"message\": \"The anonymous tier allows 5 live subscriptions (tokens + wallets) and you've reached that limit. Create a free account and get an API key at https://pumpdev.io/my-account to raise your limits.\", \"dropped\": 1, \"accepted\": 0, \"limit\": 5, \"tie",
+    "{\"type\": \"error\", \"code\": \"SUBSCRIPTION_LIMIT\", \"message\": \"The anonymous tier allows 5 live subscriptions (tokens + wallets) and you've reached that limit. Create a free account and get an API key at https://pumpdev.io/my-account to raise your limits.\", \"dropped\": 1, \"accepted\": 0, \"limit\": 5, \"tie"
+   ],
+   "subs_sent": 41
+  },
+  {
+   "url": "wss://pumpportal.fun/api/data",
+   "creates": 26,
+   "trades": 0,
+   "traded_mints": 0,
+   "other": {
+    "Successfully subscribed to token creation events.": 1,
+    "'subscribeTokenTrade' and 'subscribeAccountTrade' methods ar": 25
+   },
+   "samples": [
+    "{\"message\": \"Successfully subscribed to token creation events.\"}",
+    "{\"message\": \"'subscribeTokenTrade' and 'subscribeAccountTrade' methods are only available when connecting with an API key funded with at least 0.02 SOL.\"}",
+    "{\"message\": \"'subscribeTokenTrade' and 'subscribeAccountTrade' methods are only available when connecting with an API key funded with at least 0.02 SOL.\"}",
+    "{\"message\": \"'subscribeTokenTrade' and 'subscribeAccountTrade' methods are only available when connecting with an API key funded with at least 0.02 SOL.\"}",
+    "{\"message\": \"'subscribeTokenTrade' and 'subscribeAccountTrade' methods are only available when connecting with an API key funded with at least 0.02 SOL.\"}",
+    "{\"message\": \"'subscribeTokenTrade' and 'subscribeAccountTrade' methods are only available when connecting with an API key funded with at least 0.02 SOL.\"}",
+    "{\"message\": \"'subscribeTokenTrade' and 'subscribeAccountTrade' methods are only available when connecting with an API key funded with at least 0.02 SOL.\"}",
+    "{\"message\": \"'subscribeTokenTrade' and 'subscribeAccountTrade' methods are only available when connecting with an API key funded with at least 0.02 SOL.\"}"
+   ],
+   "subs_sent": 25
+  }
+ ]
+}
