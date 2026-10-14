@@ -1,0 +1,25 @@
+name: Diagnose
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: [diag.py]
+permissions:
+  contents: write
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install websockets==13.1
+      - run: python diag.py
+      - run: |
+          git config user.name "pump-labor-bot"; git config user.email "pump-labor-bot@users.noreply.github.com"
+          git add results/diag.json; git commit -qm "Diagnose" || true
+          for i in 1 2 3 4 5; do git pull --rebase -q && git push -q && break; sleep 5; done
