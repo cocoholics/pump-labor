@@ -127,6 +127,14 @@ def main():
         json.dump({"updated": time.time(), "tokens_total": 0}, open("results/summary.json", "w"))
         print("Noch keine Daten.")
         return
+    with_trades = sum(1 for t in toks if t["trades"])
+    if with_trades < len(toks) * 0.3:
+        json.dump({"updated": time.time(), "tokens_total": 0, "daten_unvollstaendig": True, "coins_gesehen": len(toks),
+                   "davon_mit_trades": with_trades,
+                   "hinweis": "Die Datenquelle liefert die Trades nur mit API-Schlüssel. Auswertung pausiert, damit keine falschen Zahlen entstehen."},
+                  open("results/summary.json", "w"), ensure_ascii=False)
+        print(f"Nur {with_trades} von {len(toks)} Coins haben Trades, Auswertung pausiert.")
+        return
     span_days = max((max(t["t0"] for t in toks) - min(t["t0"] for t in toks)) / 86400000, 1 / 24)
 
     curves = [Curve(t) for t in toks]
