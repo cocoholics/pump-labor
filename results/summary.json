@@ -1,5 +1,5 @@
 {
- "updated": 1791932890.0858138,
+ "updated": 1791944913.0171568,
  "tokens_total": 19047,
  "tage": 0.71,
  "coins_pro_tag": 26866,
@@ -254,5 +254,5 @@
  "einsatz_sol": 0.1,
  "gebuehr_pro_seite_pct": 1.25,
  "verzoegerung_s": 2.0,
- "laufzeit_s": 6
+ "laufzeit_s": 7
 }
