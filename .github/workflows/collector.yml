@@ -27,6 +27,8 @@ jobs:
       - name: Nächste Schicht anstoßen (wartet, bis diese fertig ist)
         env:
           GH_TOKEN: ${{ github.token }}
+          PUMPDEV_API_KEY: ${{ secrets.PUMPDEV_API_KEY }}
+          PUMPDEV_KEY_PARAM: ${{ vars.PUMPDEV_KEY_PARAM || 'api-key' }}
         run: gh workflow run collector.yml --ref main || true
       - uses: actions/setup-python@v5
         with:

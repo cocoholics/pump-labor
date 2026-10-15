@@ -33,11 +33,19 @@ async def run(url, secs=120, batch_every=1.0):
 
 async def main():
     res = []
-    for url in ["wss://pumpdev.io/ws", "wss://pumpportal.fun/api/data"]:
+    import os
+    key = os.getenv("PUMPDEV_API_KEY", "").strip()
+    urls = [("ohne Schlüssel", "wss://pumpdev.io/ws")]
+    if key:
+        urls += [(f"?{p}=", f"wss://pumpdev.io/ws?{p}={key}") for p in ("api-key", "apiKey", "api_key", "key", "token")]
+    for label, url in urls:
         try:
-            res.append(await run(url))
+            r = await run(url, secs=45)
+            r["url"] = label
+            r["samples"] = [x.replace(key, "***") if key else x for x in r["samples"]]
+            res.append(r)
         except Exception as e:
-            res.append({"url": url, "fehler": repr(e)})
+            res.append({"url": label, "fehler": repr(e).replace(key, "***") if key else repr(e)})
     json.dump({"zeit": time.time(), "ergebnisse": res}, open("results/diag.json", "w"), indent=1)
     print(json.dumps(res, indent=1))
 

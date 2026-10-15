@@ -16,7 +16,10 @@ import time
 
 import websockets
 
-FEEDS = ["wss://pumpdev.io/ws", "wss://pumpportal.fun/api/data"]  # PumpPortal liefert kaum Trades, PumpDev schon
+# PumpDev ohne Schlüssel: nur 5 Coins gleichzeitig. Mit kostenlosem Konto mehr (Schlüssel als GitHub-Secret PUMPDEV_API_KEY).
+_KEY = os.getenv("PUMPDEV_API_KEY", "").strip()
+_KEY_PARAM = os.getenv("PUMPDEV_KEY_PARAM", "api-key")
+FEEDS = [f"wss://pumpdev.io/ws?{_KEY_PARAM}={_KEY}" if _KEY else "wss://pumpdev.io/ws", "wss://pumpportal.fun/api/data"]
 TRACK_SECONDS = 600          # jeden Coin 10 Minuten verfolgen
 MAX_TRADES = 3000            # Obergrenze pro Coin, damit einzelne Riesen-Coins den Speicher nicht sprengen
 FLUSH_EVERY = 3600           # stündlich speichern und pushen
@@ -47,6 +50,8 @@ def on_message(msg):
     mint = msg.get("mint")
     if not mint:
         stats["andere"] += 1
+        if msg.get("type") == "error":
+            stats["fehler_" + str(msg.get("code", "x"))] = stats.get("fehler_" + str(msg.get("code", "x")), 0) + 1
         return
     if msg.get("txType") == "create":
         if mint in tokens:
@@ -97,7 +102,7 @@ async def listen(deadline):
         url = FEEDS[i % len(FEEDS)]
         try:
             async with websockets.connect(url, ping_interval=20, ping_timeout=20, max_size=2**22) as ws:
-                print(time.strftime("%H:%M:%S"), "verbunden mit", url, flush=True)
+                print(time.strftime("%H:%M:%S"), "verbunden mit", url.split("?")[0], "(mit Schlüssel)" if "?" in url else "", flush=True)
                 await ws.send(json.dumps({"method": "subscribeNewToken"}))
                 if tokens:  # nach Neuverbindung laufende Coins wieder abonnieren
                     pending_sub.extend(list(tokens))
